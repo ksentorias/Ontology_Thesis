@@ -14,8 +14,16 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import javax.imageio.ImageIO;
 import javax.swing.ImageIcon;
+import javax.swing.JOptionPane;
+import static thesis.Ontology_System.conn;
+import static thesis.Ontology_System.sql;
 
 /**
  *
@@ -23,7 +31,10 @@ import javax.swing.ImageIcon;
  */
 public class View_full_details extends javax.swing.JFrame {
     
-    public int ID = thesis.Ontology_System.ID;
+   public int ID = thesis.Ontology_System.ID;
+   static Connection conn = null;
+   static ResultSet rs  = null;
+   static PreparedStatement pst = null;
 
     /**
      * Creates new form View_full_details
@@ -89,6 +100,55 @@ public class View_full_details extends javax.swing.JFrame {
         // writes to output file
         //ImageIO.write(outputImage, formatName, new File(outputImagePath));
     }
+     
+     public Connection getConnectiontoDB(){
+    
+         //<editor-fold defaultstate="collapsed" desc="variables">
+        String user = "root";
+        String pass = "";
+        String host = "127.0.0.1";
+        String db = "ontology_system";
+//</editor-fold>
+      
+        //<editor-fold defaultstate="collapsed" desc="db connection">
+        
+        try {
+            System.out.println("connecting to db...");
+            conn = DriverManager.getConnection(
+                    "jdbc:mysql://" + host + "/" + db + "",
+                    "" + user + "",
+                    "" + pass + "");
+            
+            System.out.println("successfull connection...");
+
+          
+          
+      } catch (SQLException sQLException) {
+          JOptionPane.showMessageDialog(null, sQLException);
+      }
+//</editor-fold>
+        
+        return conn;
+    }
+     
+     
+     public void populate_view(){
+         try {
+             sql = "select * from ontology_system_final_table";
+             pst = getConnectiontoDB().prepareStatement(sql);
+             rs = pst.executeQuery();
+             
+             if (rs.next()) {
+                 
+             }
+         } catch (SQLException sQLException) {
+             System.err.println("populate view: " + sQLException );             
+         }
+      
+         
+         
+     
+     }
  
     /**
      * Resizes an image by a percentage of original size (proportional).

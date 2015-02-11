@@ -71,14 +71,14 @@ public class Ontology_System extends javax.swing.JFrame {
         initComponents();
         this.setVisible(true);
       //ads();
-       // index();
+     //   index();
     //  setSpecsOntology();
-      //getModels("samsung");
+    //  getModels("asus");
      // getBrands();
       //getSpecs("mi_4");
       //getModelfromAd("Solar Outdoor Rugged Powerbank & Solar Outdoor Gadgets lumia"); 
         
-        populate_table();
+       populate_table();
     }
    
     public OntModel loadModel(){
@@ -127,9 +127,15 @@ public class Ontology_System extends javax.swing.JFrame {
     
     public Model loadModelfromServer(){
     
-        DatasetAccessor accessor = DatasetAccessorFactory.createHTTP("http://localhost:3030/ds/data");
-        
-        Model loadedModel =  accessor.getModel();
+        Model loadedModel = null;
+        try {
+            DatasetAccessor accessor = DatasetAccessorFactory.createHTTP("http://localhost:3030/ds/data");
+            
+            loadedModel = accessor.getModel();
+        } catch (Exception e) {
+            
+            System.err.println("load model server: "+ e);
+        }
         
         return loadedModel;
     }
@@ -176,8 +182,11 @@ public class Ontology_System extends javax.swing.JFrame {
           //<editor-fold defaultstate="collapsed" desc="check brand and model then get specs">
                 for(Object brand: BrandsfromOntology ){
                 System.out.println("is \""+product[0].toLowerCase()+"\" contains brand: \""+brand.toString()+"\"");
+                
                 if(!product[0].toLowerCase().contains(brand.toString().toLowerCase())) {
-                } else {
+                } 
+                
+                else {
                     
                     //if have brand add it to table that he is +brand+
                     productWithfullAttribute[43] = brand.toString();
@@ -186,10 +195,16 @@ public class Ontology_System extends javax.swing.JFrame {
                     haveBrand = true;
                     
                     //initialize with matched brand
-                 //   JOptionPane.showMessageDialog(null,"Brand found: "+ brand +" from ad: "+product[0]);
+               //     JOptionPane.showMessageDialog(null,"Brand found: "+ brand +" from ad: "+product[0]);
                     
                     modelsfromOntology  = getModels(brand.toString());
+               //     JOptionPane.showMessageDialog(null,Arrays.deepToString(modelsfromOntology.toArray()));
+                    
+                  //  System.out.println(Arrays.deepToString(modelsfromOntology.toArray()));
+                    
                     for(Object model: modelsfromOntology){
+                        
+                  //      JOptionPane.showMessageDialog(null,haveModel);
                         
                         //<editor-fold defaultstate="collapsed" desc="check model and get specs">
                         if (!haveModel) {
@@ -217,7 +232,7 @@ public class Ontology_System extends javax.swing.JFrame {
                                     i++;
                                 }
                                 
-                        //        JOptionPane.showMessageDialog(null, "yes!\n"+product[0].toLowerCase()+"\n"+model);
+                                JOptionPane.showMessageDialog(null, "yes!\n"+product[0].toLowerCase()+"\n"+model);
                                
                                 
                                 for (Object object : productWithfullAttribute) {
@@ -524,9 +539,13 @@ public class Ontology_System extends javax.swing.JFrame {
               
                  
 
-                UpdateRequest update  = UpdateFactory.create(query);
-                UpdateProcessor qexec = UpdateExecutionFactory.createRemote(update, "http://localhost:3030/ds/update");
-                qexec.execute();
+                try {
+                    UpdateRequest update = UpdateFactory.create(query);
+                    UpdateProcessor qexec = UpdateExecutionFactory.createRemote(update, "http://localhost:3030/ds/update");
+                    qexec.execute();
+                } catch (Exception e) {
+                    System.err.println("set ontology: "+ e);
+                }
                 i++;
                                 
 
@@ -543,7 +562,7 @@ public class Ontology_System extends javax.swing.JFrame {
 
        // Save the updated model over the original file
        try {
-                updated.write(new FileOutputStream("C:\\Users\\test\\Documents\\test owl\\output.owl"), "RDF/XML");
+                updated.write(new FileOutputStream("C:\\Users\\ronnie\\Documents\\k3n\\output.owl"), "RDF/XML");
                  System.out.println("success!");
             } catch (FileNotFoundException fileNotFoundException) {
                 System.out.println(fileNotFoundException);
@@ -594,9 +613,9 @@ public class Ontology_System extends javax.swing.JFrame {
     
     public List getModels(String brand){
         
-         Logger rootLogger = Logger.getRootLogger();
-          rootLogger.setLevel(Level.INFO);
-          rootLogger.addAppender(new ConsoleAppender(new PatternLayout("%-6r [%p] %c - %m%n")));
+        /*         Logger rootLogger = Logger.getRootLogger();
+        rootLogger.setLevel(Level.INFO);
+        rootLogger.addAppender(new ConsoleAppender(new PatternLayout("%-6r [%p] %c - %m%n")));*/
          
       List <String> models = new ArrayList();
       int i = 0;
@@ -605,62 +624,61 @@ public class Ontology_System extends javax.swing.JFrame {
         System.out.println("fetching models from the selected brand \""+ brand.toUpperCase()+"\"...");
         Model model = loadModelfromServer();
                 
-                    String query =
-                    "PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>\n" +
-                    "PREFIX owl: <http://www.w3.org/2002/07/owl#>\n" +
-                    "PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>\n" +
-                    "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\n" +
-                    "prefix : <http://xu.edu.ph/ecommerce#>\n" +
-                    "\n" +
-                    "\n" +
-                    "SELECT ?model\n" +
-                    "WHERE {\n" +
-                    "   ?model :isaModelof :"+brand.toLowerCase()+"\n" +
-                    "}";
-
-
-                     QueryExecution exec = QueryExecutionFactory.create( query, model );
-                     com.hp.hpl.jena.query.ResultSet rs = exec.execSelect();
-                    while ( rs.hasNext() ) {
-                     QuerySolution qs = rs.next();
-                     
-                        a = a + "\n" + "*******"+qs.get("model")+"********";
-                     
-                     String mquery =
-                    "PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>\n" +
-                    "PREFIX owl: <http://www.w3.org/2002/07/owl#>\n" +
-                    "PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>\n" +
-                    "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\n" +
-                    "prefix : <http://xu.edu.ph/ecommerce#>\n" +
-                    "\n" +
-                    "\n" +
-                    "SELECT ?model_of_data_value\n" +
-                    "WHERE {\n" +
-                    "   :"+ qs.get("model").toString().substring(qs.get("model").toString().indexOf("#")+1)+" :model ?model_of_data_value\n" +
-                    "}";
-
-
-                     QueryExecution mexec = QueryExecutionFactory.create( mquery, model );
-                     com.hp.hpl.jena.query.ResultSet mrs = mexec.execSelect();
-                    while ( mrs.hasNext() ) {
-                     QuerySolution mqs = mrs.next();
+                    try {
+            String query
+                    = "PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>\n"
+                    + "PREFIX owl: <http://www.w3.org/2002/07/owl#>\n"
+                    + "PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>\n"
+                    + "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\n"
+                    + "prefix : <http://xu.edu.ph/ecommerce#>\n"
+                    + "\n"
+                    + "\n"
+                    + "SELECT ?model\n"
+                    + "WHERE {\n"
+                    + "   ?model :isaModelof :" + brand.toLowerCase() + "\n"
+                    + "}";
+            
+            QueryExecution exec = QueryExecutionFactory.create(query, model);
+            com.hp.hpl.jena.query.ResultSet rs = exec.execSelect();
+            while (rs.hasNext()) {
+                QuerySolution qs = rs.next();
+                
+                a = a + "\n" + "*******" + qs.get("model") + "********";
+                
+                String mquery
+                        = "PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>\n"
+                        + "PREFIX owl: <http://www.w3.org/2002/07/owl#>\n"
+                        + "PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>\n"
+                        + "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\n"
+                        + "prefix : <http://xu.edu.ph/ecommerce#>\n"
+                        + "\n"
+                        + "\n"
+                        + "SELECT ?model_of_data_value\n"
+                        + "WHERE {\n"
+                        + "   :" + qs.get("model").toString().substring(qs.get("model").toString().indexOf("#") + 1) + " :model ?model_of_data_value\n"
+                        + "}";
+                
+                QueryExecution mexec = QueryExecutionFactory.create(mquery, model);
+                com.hp.hpl.jena.query.ResultSet mrs = mexec.execSelect();
+                while (mrs.hasNext()) {
+                    QuerySolution mqs = mrs.next();
                    // JOptionPane.showMessageDialog(null, qs.get("model").toString().substring(qs.get("model").toString().indexOf("#")+1) + "\n" +mqs.get( "model_of_data_value" ));
                     
-                   models.add(mqs.get( "model_of_data_value" ).toString());
+                    models.add(mqs.get("model_of_data_value").toString());
                     i++;
-                    }
-               
-               
-               }
+                }
+                
+            }
+        } catch (Exception e) {
+        }
         //            System.out.println("list of models:\n"+a);
                     //<editor-fold defaultstate="collapsed" desc="check model values">
-                    /* int j = 0;
-                    while(models[j]!=null){
-                    
-                    System.out.println(models[j]);
-                    
-                    j++;
-                    }*/
+                     int j = 0;
+                    for (String model1 : models) {
+                        
+                        System.out.println("model1 = " + model1);
+            
+        }
 //</editor-fold>
                     
     
@@ -1020,6 +1038,10 @@ public class Ontology_System extends javax.swing.JFrame {
         jTextField1 = new javax.swing.JTextField();
         jLabel2 = new javax.swing.JLabel();
         jButton1 = new javax.swing.JButton();
+        jMenuBar1 = new javax.swing.JMenuBar();
+        jMenu1 = new javax.swing.JMenu();
+        jMenu2 = new javax.swing.JMenu();
+        jMenuItem1 = new javax.swing.JMenuItem();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
 
@@ -1048,6 +1070,18 @@ public class Ontology_System extends javax.swing.JFrame {
                 jButton1ActionPerformed(evt);
             }
         });
+
+        jMenu1.setText("File");
+        jMenuBar1.add(jMenu1);
+
+        jMenu2.setText("Edit");
+
+        jMenuItem1.setText("jMenuItem1");
+        jMenu2.add(jMenuItem1);
+
+        jMenuBar1.add(jMenu2);
+
+        setJMenuBar(jMenuBar1);
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
@@ -1139,6 +1173,10 @@ public class Ontology_System extends javax.swing.JFrame {
     private javax.swing.JTable ad_table;
     private javax.swing.JButton jButton1;
     private javax.swing.JLabel jLabel2;
+    private javax.swing.JMenu jMenu1;
+    private javax.swing.JMenu jMenu2;
+    private javax.swing.JMenuBar jMenuBar1;
+    private javax.swing.JMenuItem jMenuItem1;
     private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JTextField jTextField1;
     // End of variables declaration//GEN-END:variables

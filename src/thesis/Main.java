@@ -281,7 +281,7 @@ public class Main {
       int i = 0;
       
       OntModel model = ModelFactory.createOntologyModel( OntModelSpec.OWL_MEM_MICRO_RULE_INF);
-      String inputFileName="C:\\Users\\test\\Documents\\test owl\\ecommerce.owl";
+      String inputFileName="C:\\Users\\ronnie\\Documents\\k3n\\ecommerce.owl";
       String ns = "http://xu.edu.ph/ecommerce#";
       InputStream in = FileManager.get().open( inputFileName );
       if (in == null) {
